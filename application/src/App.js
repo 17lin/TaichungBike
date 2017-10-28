@@ -1,7 +1,12 @@
 import React, { Component } from "react";
+import axios from "axios";
 /**
  * App 結構
- * - 從公共
+ * - 用axios()從API撈取資料
+ * - 設定<select>與<option value>
+ *   參考資料：https://reactjs.org/docs/forms.html#the-select-tag
+ * - 送出表單後依據<option value>更換城市的API
+ * - 使用map()列出資料
  */
 class App extends Component {
   constructor(props) {
@@ -24,19 +29,19 @@ class App extends Component {
         `http://ptx.transportdata.tw/MOTC/v2/Bike/Availability/${this.state
           .city}`
     );
-
-    fetch(
-      `http://ptx.transportdata.tw/MOTC/v2/Bike/Availability/${this.state
-        .city}`,
-      { method: "GET" }
-    )
+    axios
+      .get(
+        `http://ptx.transportdata.tw/MOTC/v2/Bike/Availability/${this.state
+          .city}`
+      )
       .then(response => {
-        return response.json();
+        console.log(response);
+        this.setState({ information: response.data });
+
+        console.log(this.state.information);
       })
-      .then(list => {
-        this.setState({ information: list });
-        console.log(list);
-        console.log(JSON.stringify(this.state.information));
+      .catch(error => {
+        console.log(error);
       });
     event.preventDefault();
   }
@@ -56,24 +61,28 @@ class App extends Component {
           <input type="submit" value="送出" />
         </form>
         <table border="1">
-          <tr>
-            <td>站點唯一識別代碼</td>
-            <td>站點代碼 </td>
-            <td>服務狀態</td>
-            <td>可租借車數</td>
-            <td>可歸還車數 </td>
-            <td> 資料更新日期時間</td>
-          </tr>
-          {this.state.information.map((list, index) => (
+          <thead>
             <tr>
-              <td>{list.StationUID}</td>
-              <td>{list.StationID}</td>
-              <td>{list.ServieAvailable}</td>
-              <td>{list.AvailableRentBikes}</td>
-              <td>{list.AvailableReturnBikes}</td>
-              <td>{list.UpdateTime}</td>
+              <td>站點唯一識別代碼</td>
+              <td>站點代碼 </td>
+              <td>服務狀態</td>
+              <td>可租借車數</td>
+              <td>可歸還車數 </td>
+              <td> 資料更新日期時間</td>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {this.state.information.map((list, index) => (
+              <tr>
+                <td>{list.StationUID}</td>
+                <td>{list.StationID}</td>
+                <td>{list.ServieAvailable}</td>
+                <td>{list.AvailableRentBikes}</td>
+                <td>{list.AvailableReturnBikes}</td>
+                <td>{list.UpdateTime}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     );
